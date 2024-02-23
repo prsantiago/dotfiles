@@ -17,14 +17,7 @@ source $ZSH/oh-my-zsh.sh
 setopt HIST_IGNORE_ALL_DUPS
 
 # zoxide
-if command_exists "zoxide"; then
-    eval "$(zoxide init zsh)"
-fi
-
-# starship
-if command_exists "starship"; then
-    eval "$(starship init zsh)"
-fi
+eval "$(zoxide init zsh)"
 
 source ~/.aliases.zsh
 
