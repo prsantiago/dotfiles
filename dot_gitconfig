@@ -1,0 +1,12 @@
+[pull]
+	rebase = true
+[fetch]
+	prune = true
+[alias]
+	suno = status -uno
+[rebase]
+	autoStash = true
+[init]
+	defaultBranch = main
+[core]
+	editor = nvim
