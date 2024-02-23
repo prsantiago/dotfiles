@@ -1,0 +1,37 @@
+# vscode
+- name: Check for vscode
+  ansible.builtin.shell: command -v code
+  register: vscode_exists
+  ignore_errors: true
+
+- name: Install prerequisites
+  when: bottom_exists is failed
+  apt:
+    name:
+      - wget
+      - gpg
+      - apt-transport-https
+    state: present
+
+- name: Add Microsoft GPG key
+  when: bottom_exists is failed
+  apt_key:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+- name: Add VS Code repository
+  when: bottom_exists is failed
+  apt_repository:
+    repo: deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main
+    state: present
+
+- name: Update package lists
+  when: bottom_exists is failed
+  apt:
+    update_cache: yes
+
+- name: Install VS Code
+  when: bottom_exists is failed
+  apt:
+    name: code
+    state: present
