@@ -1,0 +1,28 @@
+- name: Ensure /usr/local/cli-plugins exists and is owned by user
+  ansible.builtin.file:
+    path: /usr/local/cli-plugins
+    state: directory
+    owner: "{{ ansible_facts['user_id'] }}"
+    mode: '0755'
+  become: true
+
+- name: Install Docker Desktop
+  community.general.homebrew_cask:
+    name: docker
+    state: present
+  ignore_errors: true
+
+- name: Install kubectl
+  community.general.homebrew:
+    name: kubectl
+    state: present
+
+- name: Install k9s
+  community.general.homebrew:
+    name: k9s
+    state: present
+
+- name: Install kind (Kubernetes IN Docker)
+  community.general.homebrew:
+    name: kind
+    state: present

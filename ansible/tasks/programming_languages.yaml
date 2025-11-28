@@ -1,11 +1,11 @@
+# Rust installation
 - name: Check for Cargo
   ansible.builtin.shell: command -v cargo
   register: cargo_exists
   ignore_errors: true
 
-- name: Download Rustup
+- name: Download Rustup installer
   when: cargo_exists is failed
-  become: true
   ansible.builtin.get_url:
     url: https://sh.rustup.rs
     dest: /tmp/sh.rustup.rs
@@ -14,4 +14,10 @@
 
 - name: Install Rust
   when: cargo_exists is failed
-  shell: /tmp/sh.rustup.rs -y
+  ansible.builtin.shell: /tmp/sh.rustup.rs -y
+
+# Go installation
+- name: Install Go with Homebrew
+  community.general.homebrew:
+    name: go
+    state: present

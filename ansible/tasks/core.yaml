@@ -1,54 +1,94 @@
-- name: Create fonts dir
-  ansible.builtin.file:
-    path: "{{lookup('env', 'HOME')}}/.local/share/fonts/"
-    state: directory
-
+# Create directories
 - name: Create local bin dir
   ansible.builtin.file:
     path: "{{lookup('env', 'HOME')}}/.local/bin"
     state: directory
+    mode: '0755'
 
-- name: Install some base packages
-  become: true
-  ansible.builtin.apt:
+- name: Create tools directory
+  ansible.builtin.file:
+    path: "{{lookup('env', 'HOME')}}/tools"
+    state: directory
+    mode: '0755'
+
+# Install core packages with Homebrew
+- name: Install core development packages
+  community.general.homebrew:
     name:
-      - ninja-build
+      - ninja
       - cmake
       - unzip
       - curl
-      - python3-venv
-      - python3-pip
+      - python@3.12
     state: present
 
-# Git
-- name: Add latest git repository
-  become: true
-  ansible.builtin.apt_repository:
-    repo: ppa:git-core/ppa
-
+# Git (macOS has git, but Homebrew provides newer versions)
 - name: Install latest git
-  become: true
-  ansible.builtin.apt:
-    update_cache: true
+  community.general.homebrew:
     name: git
-    state: latest
-
-# Brave browser
-- name: Add Brave GPG key
-  apt_key:
-    url: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
     state: present
 
-- name: Add Brave repository
-  apt_repository:
-    repo: deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main
+# Install new tools requested
+- name: Install uv (Python package manager)
+  community.general.homebrew:
+    name: uv
     state: present
 
-- name: Update package lists
-  apt:
-    update_cache: yes
+- name: Install pipx
+  community.general.homebrew:
+    name: pipx
+    state: present
 
+# Browsers
 - name: Install Brave Browser
-  apt:
+  community.general.homebrew_cask:
     name: brave-browser
     state: present
+
+- name: Install Zen Browser
+  community.general.homebrew_cask:
+    name: zen-browser
+    state: present
+  ignore_errors: true
+
+# Terminal
+- name: Install Ghostty Terminal
+  community.general.homebrew_cask:
+    name: ghostty
+    state: present
+  ignore_errors: true
+
+# ZSH
+- name: Check if zsh is default shell
+  shell: echo $SHELL
+  register: current_shell
+
+- name: Set zsh as default shell (if not already)
+  command: chsh -s /bin/zsh {{ lookup('env', 'USER') }}
+  when: "'/bin/zsh' not in current_shell.stdout"
+
+# Oh My Zsh (similar):
+- name: Install Oh My Zsh
+  ansible.builtin.git:
+    repo: https://github.com/ohmyzsh/ohmyzsh.git
+    dest: ~/.oh-my-zsh
+    depth: 1
+
+# nvim
+- name: Install Neovim
+  community.general.homebrew:
+    name: neovim
+    state: present
+
+- name: Install LazyVim
+  git:
+    repo: https://github.com/LazyVim/starter
+    dest: ~/.config/nvim
+    depth: 1
+
+# VS Code
+- name: Install VS Code
+  community.general.homebrew_cask:
+    name: visual-studio-code
+    state: present
+  ignore_errors: true
